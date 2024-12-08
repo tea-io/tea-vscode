@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import {handleBeforeFileSaved, handleFileClosed, handleFileOpened} from "./activations";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -10,16 +11,17 @@ export function activate(context: vscode.ExtensionContext) {
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "tea-vscode" is now active!');
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    const disposable = vscode.commands.registerCommand('tea-vscode.helloWorld', () => {
-        // The code you place here will be executed every time your command is executed
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World from tea-vscode!');
-    });
+    // Process all opened files on extension first activation
+    vscode.workspace.textDocuments.forEach(handleFileOpened);
 
-    context.subscriptions.push(disposable);
+    const onOpenDisposable = vscode.workspace.onDidOpenTextDocument(handleFileOpened);
+    const onCloseDisposable = vscode.workspace.onDidCloseTextDocument(handleFileClosed);
+
+    const beforeSaveDisposable = vscode.workspace.onWillSaveTextDocument(handleBeforeFileSaved);
+
+    context.subscriptions.push(onOpenDisposable);
+    context.subscriptions.push(onCloseDisposable);
+    context.subscriptions.push(beforeSaveDisposable);
 }
 
 // This method is called when your extension is deactivated
