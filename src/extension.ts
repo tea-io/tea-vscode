@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import {handleFileClosed, handleFileOpened} from "./activations";
+import {handleBeforeFileSaved, handleFileClosed, handleFileOpened} from "./activations";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -17,8 +17,11 @@ export function activate(context: vscode.ExtensionContext) {
     const onOpenDisposable = vscode.workspace.onDidOpenTextDocument(handleFileOpened);
     const onCloseDisposable = vscode.workspace.onDidCloseTextDocument(handleFileClosed);
 
+    const beforeSaveDisposable = vscode.workspace.onWillSaveTextDocument(handleBeforeFileSaved);
+
     context.subscriptions.push(onOpenDisposable);
     context.subscriptions.push(onCloseDisposable);
+    context.subscriptions.push(beforeSaveDisposable);
 }
 
 // This method is called when your extension is deactivated
